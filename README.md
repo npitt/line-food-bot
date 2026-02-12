@@ -32,18 +32,38 @@ npm start
 
 Webhook 需可從外網連線（可用 ngrok 等工具）。
 
+## 推上 GitHub
+
+1. 在 [GitHub](https://github.com) 建立新 repo（例如 `line-food-bot`，可選 public）。
+2. 在本機專案目錄執行（將 `你的帳號` 換成你的 GitHub 使用者名稱）：
+
+```bash
+cd C:\git_repo\line-food-bot
+git remote add origin https://github.com/你的帳號/line-food-bot.git
+git push -u origin main
+```
+
+`.env` 已由 `.gitignore` 排除，不會被提交。
+
 ## 部署到 Zeabur
 
-1. 將此專案 **Push 到 GitHub**
-2. 登入 [Zeabur](https://zeabur.com) → **New Project** → **Deploy from GitHub**，選擇此 repo
+1. 登入 [Zeabur](https://zeabur.com) → **New Project** → **Deploy from GitHub**，選擇此 repo
 3. 在服務的 **Variables** 分頁新增：
    - `LINE_CHANNEL_ACCESS_TOKEN`
    - `LINE_CHANNEL_SECRET`
    - `GOOGLE_PLACES_API_KEY`
-4. 部署完成後，複製 Zeabur 提供的 **公開網址**（例如 `https://xxx.zeabur.app`）
-5. 到 [LINE Developers](https://developers.line.biz) → 你的 Channel → **Messaging API** → **Webhook URL** 設為：  
-   `https://你的Zeabur網址/webhook`  
-   並開啟 **Use webhook**
+4. 部署完成後，複製 Zeabur 提供的 **公開網址**（例如 `https://xxx.zeabur.app`）。
+
+## 設定 LINE Webhook
+
+1. 到 [LINE Developers](https://developers.line.biz) → 你的 **Messaging API** Channel → **Messaging API** 分頁。
+2. **Webhook URL** 設為：`https://你的Zeabur網址/webhook`（例如 `https://xxx.zeabur.app/webhook`）。
+3. 點 **Update**，並確認 **Use webhook** 為開啟。
+4. 可點 **Verify** 檢查 Webhook 是否成功。
+
+## 驗證機器人
+
+在 LINE Developers 同一個 Channel 的 **Messaging API** 分頁，用 **LINE Official Account** 或掃描 **Channel** 的 QR code 加入機器人為好友。傳送地點（例如「台北車站」）或傳送定位，依流程選擇喜好後點「直接推薦」，確認有回傳餐廳與 Google 地圖連結。
 
 ## Google API 設定
 
