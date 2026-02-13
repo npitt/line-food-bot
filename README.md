@@ -11,12 +11,15 @@
 
 ## 環境變數
 
-| 變數 | 說明 |
-|------|------|
-| `LINE_CHANNEL_ACCESS_TOKEN` | LINE 頻道 Access Token |
-| `LINE_CHANNEL_SECRET` | LINE 頻道 Secret |
-| `GEMINI_API_KEY` | 選填。Google AI Studio API 金鑰，用於解析使用者訊息擷取地點與料理類型；[在此取得](https://aistudio.google.com/app/apikey) |
-| `PORT` | 選填，Zeabur 會自動設定 |
+| 變數                        | 說明                                                                                                                      |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| `LINE_CHANNEL_ACCESS_TOKEN` | LINE 頻道 Access Token                                                                                                    |
+| `LINE_CHANNEL_SECRET`       | LINE 頻道 Secret                                                                                                          |
+| `GEMINI_API_KEY`            | 選填。Google AI Studio API 金鑰，用於解析使用者訊息擷取地點與料理類型；[在此取得](https://aistudio.google.com/app/apikey) |
+| `OPENROUTER_API_KEY`        | 選填。OpenRouter API 金鑰；若 Gemini 不可用/失敗時作為備援（Gemini 優先）                                                 |
+| `OPENROUTER_MODEL`          | 選填。OpenRouter 模型名稱，預設 `meta-llama/llama-3.2-3b-instruct:free`                                                   |
+| `OPENROUTER_REFERRER`       | 選填。OpenRouter `HTTP-Referer` header，未填則使用預設 repo URL                                                           |
+| `PORT`                      | 選填，Zeabur 會自動設定                                                                                                   |
 
 ## 本地執行
 
@@ -29,6 +32,28 @@ npm start
 ```
 
 Webhook 需可從外網連線（可用 ngrok 等工具）。
+
+## 測試
+
+- 預設測試（建議在 CI 使用，無需 Gemini 配額）：
+
+```bash
+npm test
+```
+
+- 僅測 Gemini 解析邏輯（離線單元測試）：
+
+```bash
+npm run test:gemini
+```
+
+- Gemini 線上整合測試（需要 `GEMINI_API_KEY`，若有設定 `OPENROUTER_API_KEY` 可作為備援）：
+
+```bash
+npm run test:gemini:live
+```
+
+> Windows PowerShell 若遇到 `npm.ps1` 執行政策限制，可改用 `npm.cmd`。
 
 ## 推上 GitHub
 
@@ -49,7 +74,9 @@ git push -u origin main
 2. 在服務的 **Variables** 分頁新增：
    - `LINE_CHANNEL_ACCESS_TOKEN`
    - `LINE_CHANNEL_SECRET`
-   - （選填）`GEMINI_API_KEY`：若要用自然語解析地點與料理類型
+   - （選填）`GEMINI_API_KEY`：若要用自然語解析地點與料理類型（優先）
+   - （選填）`OPENROUTER_API_KEY`：Gemini 失敗時可用的備援
+   - （選填）`OPENROUTER_MODEL`：預設 `meta-llama/llama-3.2-3b-instruct:free`
 3. 部署完成後，複製 Zeabur 提供的 **公開網址**（例如 `https://xxx.zeabur.app`）。
 
 ## 設定 LINE Webhook

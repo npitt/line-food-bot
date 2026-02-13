@@ -21,10 +21,29 @@ async function run() {
   ];
 
   let passed = 0;
+  let skipped = 0;
   let failed = 0;
   for (const { msg, state, expectIntent } of cases) {
+    let warnedQuotaOrRateLimit = false;
+    const originalWarn = console.warn;
+    console.warn = (...args) => {
+      const text = args
+        .map((arg) => (typeof arg === 'string' ? arg : String(arg)))
+        .join(' ')
+        .toLowerCase();
+      if (text.includes('429') || text.includes('quota') || text.includes('rate limit')) {
+        warnedQuotaOrRateLimit = true;
+      }
+      originalWarn(...args);
+    };
+
     try {
       const r = await parseIntent(msg, state);
+      if (warnedQuotaOrRateLimit) {
+        console.log(`  - "${msg}" 略過：Gemini 配額/速率限制 (429)`);
+        skipped++;
+        continue;
+      }
       const ok = r.intent === expectIntent;
       if (ok) {
         console.log(`  ✓ "${msg}" → intent=${r.intent} (location=${r.location || '-'}, cuisine=${r.cuisine || '-'})`);
@@ -34,16 +53,24 @@ async function run() {
         failed++;
       }
     } catch (e) {
-      console.log(`  ✗ "${msg}": ${e.message}`);
-      failed++;
+      if (warnedQuotaOrRateLimit) {
+        console.log(`  - "${msg}" 略過：Gemini 配額/速率限制 (429)`);
+        skipped++;
+      } else {
+        console.log(`  ✗ "${msg}": ${e.message}`);
+        failed++;
+      }
+    } finally {
+      console.warn = originalWarn;
     }
   }
 
   console.log('\n--- 結果 ---');
-  console.log(`通過: ${passed}, 失敗: ${failed}`);
-  if (failed > 0 && passed === 0) {
-    console.log('(若為 API 配額或連線錯誤，請稍後再試或檢查 GEMINI_API_KEY)');
+  console.log(`通過: ${passed}, 略過: ${skipped}, 失敗: ${failed}`);
+  if (failed === 0 && skipped > 0) {
+    console.log('(部分案例因 API 配額或速率限制被略過)');
     process.exit(0);
+    return;
   }
   process.exit(failed > 0 ? 1 : 0);
 }
