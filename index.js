@@ -105,6 +105,10 @@ async function handleEvent(event, client) {
     }
   } catch (err) {
     console.error('handleEvent error:', err);
+    const detail = err?.originalError?.response?.data;
+    if (detail) {
+      console.error('handleEvent error detail:', JSON.stringify(detail));
+    }
   }
   return null;
 }
