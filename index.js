@@ -22,7 +22,10 @@ if (!config.channelAccessToken || !config.channelSecret) {
   console.warn('請設定 LINE_CHANNEL_ACCESS_TOKEN 與 LINE_CHANNEL_SECRET');
 }
 
-const client = new line.Client(config);
+// 建立 LINE v9 API Client
+const client = new line.messagingApi.MessagingApiClient({
+  channelAccessToken: config.channelAccessToken
+});
 
 // 簡單快取：紀錄已經處理過的 x-line-retry-key，避免重複處理相同請求
 // 由於在 Lambda / Serverless 環境下也可能重新啟動而清空快取，

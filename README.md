@@ -24,6 +24,15 @@
 | `OPENROUTER_REFERRER`        | 選填。OpenRouter `HTTP-Referer` header，未填則使用預設 repo URL                                                           |
 | `PORT`                       | 選填，Zeabur 會自動設定                                                                                                   |
 
+## 開發環境與核心套件版本要求
+
+為確保功能正常運作，本專案依賴以下特定環境與版本：
+
+- **Node.js**: `>= 18.0.0`
+- **@line/bot-sdk**: `^10.6.0` (因應 v9 後的 Breaking Changes 以及 `showLoadingAnimation` 支援)
+- **@google/generative-ai**: `^0.21.0` (Gemini API 核心套件)
+- **express**: `^4.18.2`
+
 ## 本地執行
 
 ```bash
