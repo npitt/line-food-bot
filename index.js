@@ -26,6 +26,10 @@ if (!config.channelAccessToken || !config.channelSecret) {
 const client = new line.messagingApi.MessagingApiClient({
   channelAccessToken: config.channelAccessToken
 });
+// 建立用來下載圖片等檔案內容的 Blob Client
+const blobClient = new line.messagingApiBlob.MessagingApiBlobClient({
+  channelAccessToken: config.channelAccessToken
+});
 
 // 簡單快取：紀錄已經處理過的 x-line-retry-key，避免重複處理相同請求
 // 由於在 Lambda / Serverless 環境下也可能重新啟動而清空快取，
@@ -100,7 +104,7 @@ app.post(
 
     // 在背景執行處理，發後不理 (fire-and-forget)，不用等待其結果
     req.body.events.forEach((event) => {
-      handleEvent(event, client).catch(err => {
+      handleEvent(event, client, blobClient).catch(err => {
         console.error('Background event handling error:', err);
         // 發生錯誤時將 retryKey 移除，讓下一次如有重試時能再執行
         if (retryKey) processedRetries.delete(retryKey);
@@ -124,13 +128,13 @@ function safeSend200(res) {
   }
 }
 
-async function handleEvent(event, client) {
+async function handleEvent(event, client, blobClient) {
   try {
     if (event.type === 'message') {
-      return await handleMessage(event, client);
+      return await handleMessage(event, client, blobClient);
     }
     if (event.type === 'postback') {
-      return await handlePostback(event, client);
+      return await handlePostback(event, client, blobClient);
     }
   } catch (err) {
     console.error('handleEvent error:', err);
