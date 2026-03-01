@@ -8,7 +8,7 @@ require('dotenv').config();
 const express = require('express');
 const line = require('@line/bot-sdk');
 
-const { handleMessage, handlePostback } = require('./lib/handler');
+const { handleMessage, handlePostback, handleJoin } = require('./lib/handler');
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -135,6 +135,10 @@ async function handleEvent(event, client, blobClient) {
     }
     if (event.type === 'postback') {
       return await handlePostback(event, client, blobClient);
+    }
+    // 當機器人被加入群組，或是群組有新成員加入時
+    if (event.type === 'join' || event.type === 'memberJoined') {
+      return await handleJoin(event, client);
     }
   } catch (err) {
     console.error('handleEvent error:', err);
