@@ -27,7 +27,7 @@ const client = new line.messagingApi.MessagingApiClient({
   channelAccessToken: config.channelAccessToken
 });
 // 建立用來下載圖片等檔案內容的 Blob Client
-const blobClient = new line.messagingApiBlob.MessagingApiBlobClient({
+const blobClient = new line.messagingApi.MessagingApiBlobClient({
   channelAccessToken: config.channelAccessToken
 });
 
