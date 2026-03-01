@@ -1,13 +1,12 @@
-# LINE 美食推薦機器人
+# LINE 聊天機器人 (Gemini / OpenRouter)
 
-依「地點」推薦附近餐廳，可依喜好篩選。**完全免費**：使用 OpenStreetMap（Nominatim + Overpass），不需 Google API、不需綁卡。
+這是一個純對話的 LINE 機器人。**完全免費**：預設優先使用 Google Gemini 處理訊息，若發生錯誤則自動退回使用 OpenRouter 提供的免費模型。
 
 ## 功能
 
-- **輸入地點**：傳送地址或地名（如「台北車站」），或傳送 LINE 定位
-- **選用 Google AI Studio（Gemini）**：設定 `GEMINI_API_KEY` 後，可用自然語描述，例如「信義區附近想找日式」→ 自動擷取地點「信義區」與料理「日式」，查詢更精準
-- **喜好篩選**：料理類型（中式、日式、韓式、西式、泰式、咖啡甜點、素食、不限）等
-- **結果**：店名、地址、**在地圖開啟／導航**按鈕（點擊可用 Google 地圖導航）。無評分資料（免費地圖不提供）
+- **純文字對話**：傳送任何文字訊息，機器人皆會由 AI 模型回應。
+- **GEM (自訂專家) 概念**：可透過設定 `GEM_SYSTEM_INSTRUCTION` 環境變數，賦予模型特定人設與系統提示（System Prompt），例如將其設定為專業導遊、程式設計助理等。
+- **雙模型備援**：優先使用 `GEMINI_API_KEY`，如未設定或呼叫失敗，將自動轉由 `OPENROUTER_API_KEY` 接手。
 
 ## 環境變數
 
@@ -15,8 +14,9 @@
 | ---------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
 | `LINE_CHANNEL_ACCESS_TOKEN`  | LINE 頻道 Access Token                                                                                                    |
 | `LINE_CHANNEL_SECRET`        | LINE 頻道 Secret                                                                                                          |
-| `GEMINI_API_KEY`             | 選填。Google AI Studio API 金鑰，用於解析使用者訊息擷取地點與料理類型；[在此取得](https://aistudio.google.com/app/apikey) |
-| `OPENROUTER_API_KEY`         | 選填。OpenRouter API 金鑰；意圖解析預設優先使用                                                                           |
+| `GEMINI_API_KEY`             | 選填。Google AI Studio API 金鑰，對話預設優先使用；[在此取得](https://aistudio.google.com/app/apikey)                     |
+| `OPENROUTER_API_KEY`         | 選填。OpenRouter API 金鑰；作為 Gemini 的備援模型使用                                                                     |
+| `GEM_SYSTEM_INSTRUCTION`     | 選填。自訂 AI 專家角色 (System Prompt) 概念，例如：`設定為精通日本旅遊的導遊`                                             |
 | `OPENROUTER_MODEL`           | 選填。OpenRouter 主模型，預設 `openrouter/aurora-alpha`                                                                   |
 | `OPENROUTER_MODEL_FALLBACKS` | 選填。OpenRouter 備援模型清單（逗號分隔），主模型失敗時依序嘗試；預設 `meta-llama/llama-3.2-3b-instruct:free`             |
 | `OPENROUTER_REFERRER`        | 選填。OpenRouter `HTTP-Referer` header，未填則使用預設 repo URL                                                           |
@@ -36,22 +36,10 @@ Webhook 需可從外網連線（可用 ngrok 等工具）。
 
 ## 測試
 
-- 預設測試（建議在 CI 使用，無需 Gemini 配額）：
+- 僅確認語法是否正常（無正式測試包含於目前專案中，主要透過直接啟動測試）：
 
 ```bash
-npm test
-```
-
-- 僅測 Gemini 解析邏輯（離線單元測試）：
-
-```bash
-npm run test:gemini
-```
-
-- Gemini 線上整合測試（需要 `GEMINI_API_KEY`；若同時設定 `OPENROUTER_API_KEY`，預設仍會先走 OpenRouter）：
-
-```bash
-npm run test:gemini:live
+npm start
 ```
 
 > Windows PowerShell 若遇到 `npm.ps1` 執行政策限制，可改用 `npm.cmd`。
@@ -75,8 +63,9 @@ git push -u origin main
 2. 在服務的 **Variables** 分頁新增：
    - `LINE_CHANNEL_ACCESS_TOKEN`
    - `LINE_CHANNEL_SECRET`
-   - （選填）`OPENROUTER_API_KEY`：自然語意圖解析預設優先使用
-   - （選填）`GEMINI_API_KEY`：當 OpenRouter 不可用或失敗時的備援
+   - （選填）`GEMINI_API_KEY`：對話預設優先使用
+   - （選填）`GEM_SYSTEM_INSTRUCTION`：自訂專家角色指令設定
+   - （選填）`OPENROUTER_API_KEY`：當 Gemini 不可用或失敗時的備援
    - （選填）`OPENROUTER_MODEL`：預設 `openrouter/aurora-alpha`
    - （選填）`OPENROUTER_MODEL_FALLBACKS`：備援模型清單（逗號分隔）
 3. 部署完成後，複製 Zeabur 提供的 **公開網址**（例如 `https://xxx.zeabur.app`）。
@@ -90,7 +79,7 @@ git push -u origin main
 
 ## 驗證機器人
 
-在 LINE Developers 同一個 Channel 的 **Messaging API** 分頁，用 **LINE Official Account** 或掃描 **Channel** 的 QR code 加入機器人為好友。傳送地點（例如「台北車站」）或傳送定位，依流程選擇喜好後點「直接推薦」，確認有回傳餐廳與地圖導航連結。
+在 LINE Developers 同一個 Channel 的 **Messaging API** 分頁，用 **LINE Official Account** 或掃描 **Channel** 的 QR code 加入機器人為好友。傳送任何文字訊息，確認機器人能正常使用 Gemini 進行回覆。如果有設定 `GEM_SYSTEM_INSTRUCTION`，可以從回應的語氣與內容確認設定是否生效。
 
 ## 授權
 

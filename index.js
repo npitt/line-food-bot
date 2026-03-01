@@ -71,11 +71,13 @@ app.post(
     if (!req.body?.events?.length) {
       return safeSend200(res);
     }
+
+    // 立即回傳 200 OK，避免 LINE 官方因為等待 AI 處理逾時而重試
+    safeSend200(res);
+
     Promise.all(req.body.events.map((event) => handleEvent(event, client)))
-      .then(() => safeSend200(res))
       .catch((err) => {
         console.error('Webhook error:', err);
-        safeSend200(res);
       });
   }
 );
