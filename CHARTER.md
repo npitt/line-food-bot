@@ -1,6 +1,6 @@
 # LINE Food Bot 開發憲法 (Development Charter)
 
-本憲法確立了「史都華教練 (Stuart)」專案的核心開發準則與架構規範。任何後續的開發、修改或重構，皆「必須」遵守以下規則，以確保系統穩定、費用可控且人設一致。
+本憲法確立了「史都華 (Stuart)」專案的核心開發準則與架構規範。任何後續的開發、修改或重構，皆「必須」遵守以下規則，以確保系統穩定、費用可控且人設一致。
 
 ## 1. 核心架構與效能準則 (Architecture & Performance)
 1. **發後不理 (Fire-and-Forget)**：介接 LINE Webhook 時，主程序必須立即回傳 HTTP 200 OK (`Promise.resolve(null)` 等)。耗時的 AI 運算必須放在背景非同步執行，絕對不可阻塞 Webhook 回應，以免引發 LINE 伺服器 Timeout 導致的重發機制轟炸。
