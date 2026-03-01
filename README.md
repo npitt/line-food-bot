@@ -32,7 +32,22 @@
 | `OPENROUTER_MODEL_FALLBACKS` | 選填。OpenRouter 備援模型清單（逗號分隔），主模型失敗時依序嘗試；預設 `meta-llama/llama-3.2-3b-instruct:free`             |
 | `OPENROUTER_REFERRER`        | 選填。OpenRouter `HTTP-Referer` header，未填則使用預設 repo URL                                                           |
 | `ADMIN_USER_ID`              | 選填。設定您的 LINE `userId`，設定後僅有您可輸入關鍵字「使用量」查詢系統 API 呼叫統計。                                     |
+| `DATA_DIR`                   | 選填。持久化資料存放目錄 (課表等運行時資料)，預設 `/tmp`。Zeabur 可設為持久磁碟路徑。                                         |
 | `PORT`                       | 選填，Zeabur 會自動設定                                                                                                   |
+
+## 專案結構
+
+```
+lib/
+├── constants.js      全域常數集中管理
+├── flexBuilder.js    LINE Flex Message 組裝
+├── imageHandler.js   圖片下載壓縮與批次佇列
+├── handler.js        事件路由與文字指令處理
+├── gemini.js         AI 對話核心 (Gemini/OpenRouter)
+├── schedule.js       課表解析、持久化與群組隔離
+├── places.js         Google Places API 串接
+└── strava.js         Strava 資料擷取
+```
 
 ## 開發環境與核心套件版本要求
 

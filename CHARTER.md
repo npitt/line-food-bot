@@ -9,8 +9,10 @@
 4. **資源與記憶體防護**：使用者傳送的任何圖片，在轉交給 AI (轉換為 Base64) 分析前，**絕對必須**透過 `sharp` 套件進行壓縮 (寬度限制 1024px，JPEG 畫質 80%)。嚴禁將龐大的原始圖檔直接塞給 API 避免超過 Payload 限制與浪費記憶體。
 5. **多圖片節流機制 (Debouncing & Batching)**：不允許對群組中使用者連發的數張圖片進行連環洗版回覆。必須以 `userId` 為鍵值建立暫存佇列 (Batch Queue)，等待約 1.5 秒無新圖片傳入後，再將收集來的圖片陣列一併打包發送給 AI 進行「綜合批次分析」。
 6. **成本與自動降級機制 (Cost Optimization)**：系統應具備 In-Memory 用量追蹤。當高品質模型 (`gemini-2.5-flash`) 接近免費額度上限時，必須能自動切換模型（如降級至 `flash-lite`) 進行防護，確保服務不因額度耗盡而停擺。系統必須具備成本與自動降級防護 (Flash -> Flash-Lite)，且於每日 00:00 (台北時間) 自動重置計數並恢復優先使用高品質模型。
-7. **業務數據持久化 (Data Persistence)**：關鍵業務數據 (如課表換算結果) 必須實作本地持久化存儲 (JSON)，確保服務重啟後數據不丟失。
+7. **業務數據持久化 (Data Persistence)**：關鍵業務數據 (如課表換算結果) 必須實作本地持久化存儲 (JSON)，存儲路徑必須透過環境變數 (`DATA_DIR`) 控制，以相容容器化部署環境。
 8. **自動維護清理 (Automated Cleanup)**：系統必須具備自動維護清理機制，針對超過一年 (365天) 無動作之資料來源 (如群組) 進行排程或存儲時過濾清除。
+9. **模組化架構 (Modular Architecture)**：各功能區塊必須拆分為獨立模組，單一檔案不應超過 300 行。圖片處理 (`imageHandler.js`)、Flex 卡片組裝 (`flexBuilder.js`)、AI 對話 (`gemini.js`)、課表解析 (`schedule.js`) 等應各自獨立。
+10. **常數集中管理 (Centralized Constants)**：所有硬編碼的閾值、限制、時間窗口等參數必須統一定義於 `lib/constants.js`，不得散落在各模組中。
 
 ## 2. 角色設定與對話準則 (System & Persona Constraints)
 1. **外部化設定管理**：角色的 System Instruction、性格、能力設定，必須統一收斂與維護在專案目錄的 `gemini.config.yaml`，讓角色語意設定與主程式邏輯抽離，且方便進行 Git 版本控制。
