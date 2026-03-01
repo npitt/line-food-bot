@@ -7,7 +7,7 @@
 require('dotenv').config();
 const express = require('express');
 const line = require('@line/bot-sdk');
-const { searchNearbyRestaurants, geocodeAddress } = require('./lib/places');
+
 const { handleMessage, handlePostback } = require('./lib/handler');
 
 const app = express();
@@ -98,10 +98,10 @@ function safeSend200(res) {
 async function handleEvent(event, client) {
   try {
     if (event.type === 'message') {
-      return await handleMessage(event, client, { searchNearbyRestaurants, geocodeAddress });
+      return await handleMessage(event, client);
     }
     if (event.type === 'postback') {
-      return await handlePostback(event, client, { searchNearbyRestaurants, geocodeAddress });
+      return await handlePostback(event, client);
     }
   } catch (err) {
     console.error('handleEvent error:', err);
