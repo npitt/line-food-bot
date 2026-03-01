@@ -5,7 +5,7 @@
 ## 功能
 
 - **純文字對話**：傳送任何文字訊息，機器人皆會由 AI 模型回應。
-- **GEM (自訂專家) 概念**：可透過設定 `GEM_SYSTEM_INSTRUCTION` 環境變數，賦予模型特定人設與系統提示（System Prompt），例如將其設定為專業導遊、程式設計助理等。
+- **自訂角色 (GEM) 概念**：所有角色與人設（System Prompt），皆統一由專案根目錄的 `gemini.config.json` 來控管，預設提供「幽默風趣且有同理心的當地美食專家兼馬拉松/健身教練」，會隨專案一併佈署生效。如果在機器平台或是 `.env` 另外設定了 `GEM_SYSTEM_INSTRUCTION` 環境變數，則會具有最高優先權並覆寫設定檔。
 - **雙模型備援**：優先使用 `GEMINI_API_KEY`，如未設定或呼叫失敗，將自動轉由 `OPENROUTER_API_KEY` 接手。
 - **強健的非同步架構 (Best Practice)**：因應 LLM 思考時間較長，實作了防重複金鑰 (`x-line-retry-key`) 以避免 LINE Webhook 逾時重發；並具備「發後不理 (fire-and-forget)」的背景處理機制。
 - **智慧回覆降級與體驗優化**：對話當下會顯示讀取動畫 (Loading Animation)，並在處理完畢時優先使用 Reply API，若因等待過久導致 Token 失效，將自動降級改用 Push API 主動推播結果，確保訊息不漏接。
@@ -18,7 +18,7 @@
 | `LINE_CHANNEL_SECRET`        | LINE 頻道 Secret                                                                                                          |
 | `GEMINI_API_KEY`             | 選填。Google AI Studio API 金鑰，對話預設優先使用；[在此取得](https://aistudio.google.com/app/apikey)                     |
 | `OPENROUTER_API_KEY`         | 選填。OpenRouter API 金鑰；作為 Gemini 的備援模型使用                                                                     |
-| `GEM_SYSTEM_INSTRUCTION`     | 選填。自訂 AI 專家角色 (System Prompt) 概念，例如：`設定為精通日本旅遊的導遊`                                             |
+| `GEM_SYSTEM_INSTRUCTION`     | 選填。環境變數型態的 System Prompt。**建議直接修改 `gemini.config.json`**，但若在此設定，則會**覆寫**設定檔的內容。       |
 | `OPENROUTER_MODEL`           | 選填。OpenRouter 主模型，預設 `openrouter/aurora-alpha`                                                                   |
 | `OPENROUTER_MODEL_FALLBACKS` | 選填。OpenRouter 備援模型清單（逗號分隔），主模型失敗時依序嘗試；預設 `meta-llama/llama-3.2-3b-instruct:free`             |
 | `OPENROUTER_REFERRER`        | 選填。OpenRouter `HTTP-Referer` header，未填則使用預設 repo URL                                                           |
