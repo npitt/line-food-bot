@@ -6,8 +6,8 @@
 
 - **純文字對話**：傳送任何文字訊息，機器人皆會由 AI 模型回應。
 - **上下文記憶 (Context Memory)**：AI 會記得與您近 30 分鐘內的數則對話歷史，讓聊天能順暢承接上文（例如：先問「想配多少？」，再回「五分半」，教練聽得懂）。
-- **看圖給建議 (多模態 Vision)**：直接上傳運動數據截圖或餐點照片給機器人，AI 將自動辨識圖片內容並以教練或美食家的口吻給予專業分析。
-- **在地位置推薦**：可直接在聊天室傳送「位置資訊 (Location)」，AI 將會根據該地點（包含地址與地標名稱）自動為您推薦附近的美食或周邊資訊。為求簡潔，**餐廳名單預設將以標準化純文字清單格式**（包含店名、評價、價格區間、推薦品項、地圖連結）呈現。
+- **看圖給建議 (多模態 Vision)**：直接上傳運動數據截圖或餐點照片給機器人，AI 將自動辨識圖片內容（甚至是圖中的人名）並以專屬口吻給予專業分析。
+- **在地位置精準推薦 (Google Places 串接)**：直接在聊天室傳送「位置資訊 (Location)」，系統將自動呼叫 Google Places API 搜尋方圓內真實且營業中的高分餐廳，並以精美的 **LINE Flex Message (滑動卡片輪播)** 伴隨導航按鈕呈現，斷絕 AI 憑空捏造的幽靈餐廳。
 - **自訂角色 (GEM) 概念**：所有角色與人設（System Prompt），皆統一由專案根目錄的 `gemini.config.json` 來控管，預設提供「幽默風趣且有同理心的當地美食專家兼馬拉松/健身教練」，會隨專案一併佈署生效。如果在機器平台或是 `.env` 另外設定了 `GEM_SYSTEM_INSTRUCTION` 環境變數，則會具有最高優先權並覆寫設定檔。
 - **雙模型備援**：優先使用 `GEMINI_API_KEY`，如未設定或呼叫失敗，將自動轉由 `OPENROUTER_API_KEY` 接手。
 - **強健的非同步架構 (Best Practice)**：因應 LLM 思考時間較長，實作了防重複金鑰 (`x-line-retry-key`) 以避免 LINE Webhook 逾時重發；並具備「發後不理 (fire-and-forget)」的背景處理機制。
@@ -21,6 +21,7 @@
 | `LINE_CHANNEL_ACCESS_TOKEN`  | LINE 頻道 Access Token                                                                                                    |
 | `LINE_CHANNEL_SECRET`        | LINE 頻道 Secret                                                                                                          |
 | `GEMINI_API_KEY`             | 選填。Google AI Studio API 金鑰，對話預設優先使用；[在此取得](https://aistudio.google.com/app/apikey)                     |
+| `GOOGLE_PLACES_API_KEY`      | 選填/強烈建議。串接真實世界數據，讓在地美食推薦能撈取營業中且具高評價的實際餐廳。 |
 | `OPENROUTER_API_KEY`         | 選填。OpenRouter API 金鑰；作為 Gemini 的備援模型使用                                                                     |
 | `GEM_SYSTEM_INSTRUCTION`     | 選填。環境變數型態的 System Prompt。**建議直接修改 `gemini.config.json`**，但若在此設定，則會**覆寫**設定檔的內容。       |
 | `OPENROUTER_MODEL`           | 選填。OpenRouter 主模型，預設 `openrouter/aurora-alpha`                                                                   |
@@ -79,6 +80,7 @@ git push -u origin main
    - `LINE_CHANNEL_ACCESS_TOKEN`
    - `LINE_CHANNEL_SECRET`
    - （選填）`GEMINI_API_KEY`：對話預設優先使用
+   - （選填但強烈建議）`GOOGLE_PLACES_API_KEY`：用以提供真實準確的美食推薦卡片
    - （選填）`GEM_SYSTEM_INSTRUCTION`：自訂專家角色指令設定
    - （選填）`OPENROUTER_API_KEY`：當 Gemini 不可用或失敗時的備援
    - （選填）`OPENROUTER_MODEL`：預設 `openrouter/aurora-alpha`
