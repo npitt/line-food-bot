@@ -26,6 +26,7 @@
 1. **Google Places 真實世界防護網**：當使用者詢問實體地點附近的美食時，必須透過後端攔截並優先呼叫 Google Places API 撈取真實店家。**嚴禁 AI 憑空捏造餐廳**。賦予 AI 的 Prompt 必須強硬要求只能由 API 提供的營業中高分餐廳裡挑選推薦，杜絕 LLM 創造幽靈餐廳的幻覺。
 2. **Strava 零權限爬蟲**：不依賴複雜的 Strava OAuth API。應直接攔截聊天中的 `strava.app.link` URL，跟隨轉址並抓取最終頁面的 OGP Tag (標題、描述)。若要取得高階數據 (爬升、心率、步頻)，必須解析內嵌的 React State (`__NEXT_DATA__`)。
 3. **天氣資訊補償機制**：當 Strava 原始資料缺乏氣象資訊時，必須主動利用提取出的「當地時間戳記」與起點地理座標，呼叫免金鑰的天氣 API (如 Open-Meteo) 進行反查，將當時當地的氣溫與濕度補齊以利教練分析。
+4. **全端統一卡片化 (Universal Flex Message)**：為防止 AI 輸出 JSON 明文，不論是對話模組 (`handler.js`) 或是圖片分析模組 (`imageHandler.js`)，只要 AI 回應中解析出符合餐廳推薦格式的 JSON，**絕對必須**透過 `flexBuilder.js` 攔截並轉換為 LINE Flex Carousel 卡片，確保跨模組的使用體驗具備一致的精緻度。
 
 ## 4. 群組體驗與干擾防護 (Group Chat Experience)
 1. **無指令不回覆 (Idle Silence)**：在非一對一的聊天室 (群組) 中，若對話未被明確呼叫 (`史都華`, `Stuart`, `stu` 等關鍵詞) 且為純文字閒聊，機器人**絕對不可**主動插話回應。
