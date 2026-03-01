@@ -9,7 +9,8 @@
 - **看圖給建議 (多模態 Vision)**：直接上傳運動數據截圖或餐點照片給機器人，AI 將自動辨識圖片內容（甚至是圖中的人名）並以專屬口吻給予充滿溫度的專業分析。支援**多聯圖發送 (Image Batching)**，AI 會在短暫等待後融合多圖內容一次性回覆。此外，引入**群組防洗版過濾機制**，自動略過與運動、美食無關的生活閒聊截圖。
 - **支援讀取 Strava 運動成績**：在對話中貼上 `strava.app.link` 或活動網址，系統會在背景擷取 OGP 摘要（如：距離、配速、時間），並深入解析 JSON 狀態獲取**跑者姓名**、**總爬升**、**平均心率**、**步頻**等進階數據。更具備**氣象補償機制**，當 Strava 缺少天氣記錄時，系統會調用 `Open-Meteo API`，根據活動地點與發生時間反查當下的精準氣溫與濕度。最終 AI 會結合這些數據，給予具有同理心與幽默感的溫暖鼓勵代替嚴苛的冰冷數據。
 - **在地位置精準推薦 (Google Places 串接)**：直接在聊天室傳送「位置資訊 (Location)」，系統將自動呼叫 Google Places API 搜尋方圓內真實且營業中的高分餐廳，並以精美的 **LINE Flex Message (滑動卡片輪播)** 伴隨導航按鈕呈現，斷絕 AI 憑空捏造的幽靈餐廳。
-- **自訂角色 (GEM) 概念**：所有角色與人設（System Prompt），皆統一由專案根目錄的 `gemini.config.yaml` 來控管，預設提供「幽默風趣且有同理心的當地美食專家兼馬拉松/健身教練」，會隨專案一併佈署生效。如果在機器平台或是 `.env` 另外設定了 `GEM_SYSTEM_INSTRUCTION` 環境變數，則會具有最高優先權並覆寫設定檔。
+- **自訂角色 (GEM) 概念**：所有角色與人設（System Prompt），皆統一由專案根目錄的 `gemini.config.yaml` 來控管。
+- **自動模型降級與用量監控**：內建 API 用量追蹤機制，優先使用高品質 `gemini-2.5-flash`，當接近每日免費上限 (250次) 時，會自動轉換為 `gemini-2.5-flash-lite` 模型以確保服務不中斷。支援管理員透過指令「使用量」進行即時狀態查詢。
 - **雙模型備援**：優先使用 `GEMINI_API_KEY`，如未設定或呼叫失敗，將自動轉由 `OPENROUTER_API_KEY` 接手。
 - **強健的非同步架構 (Best Practice)**：因應 LLM 思考時間較長，實作了防重複金鑰 (`x-line-retry-key`) 以避免 LINE Webhook 逾時重發；並具備「發後不理 (fire-and-forget)」的背景處理機制。
 - **智慧回覆降級與體驗優化**：對話當下會顯示讀取動畫 (Loading Animation)，並在處理完畢時優先使用 Reply API，若因等待過久導致 Token 失效，將自動降級改用 Push API 主動推播結果，確保訊息不漏接。
@@ -28,6 +29,7 @@
 | `OPENROUTER_MODEL`           | 選填。OpenRouter 主模型，預設 `openrouter/aurora-alpha`                                                                   |
 | `OPENROUTER_MODEL_FALLBACKS` | 選填。OpenRouter 備援模型清單（逗號分隔），主模型失敗時依序嘗試；預設 `meta-llama/llama-3.2-3b-instruct:free`             |
 | `OPENROUTER_REFERRER`        | 選填。OpenRouter `HTTP-Referer` header，未填則使用預設 repo URL                                                           |
+| `ADMIN_USER_ID`              | 選填。設定您的 LINE `userId`，設定後僅有您可輸入關鍵字「使用量」查詢系統 API 呼叫統計。                                     |
 | `PORT`                       | 選填，Zeabur 會自動設定                                                                                                   |
 
 ## 開發環境與核心套件版本要求
