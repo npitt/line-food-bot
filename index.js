@@ -24,6 +24,13 @@ if (!config.channelAccessToken || !config.channelSecret) {
 
 const client = new line.Client(config);
 
+// 簡單快取：紀錄已經處理過的 x-line-retry-key，避免重複處理相同請求
+// 由於在 Lambda / Serverless 環境下也可能重新啟動而清空快取，
+// 但在一般運行時間內可以有效阻擋 LINE 因為 Timeout 產生的 Retry。
+const processedRetries = new Set();
+// 定期清理舊的 x-line-retry-key
+setInterval(() => processedRetries.clear(), 10 * 60 * 1000);
+
 // 手動讀取原始 body（Buffer），避免被平台或 express.json 先解析導致簽章驗證失敗
 function rawBodyMiddleware(req, res, next) {
   const existingBody = req.body;
@@ -72,13 +79,30 @@ app.post(
       return safeSend200(res);
     }
 
-    // 立即回傳 200 OK，避免 LINE 官方因為等待 AI 處理逾時而重試
+    // 取得 LINE 為了 Retry 送來的識別碼
+    const retryKey = req.headers['x-line-retry-key'];
+
+    // 若該 retry-key 已經被處理過，表示是 LINE 因為 Timeout 重送的請求，直接略過。
+    if (retryKey && processedRetries.has(retryKey)) {
+      console.log(`[Retry Handler] 略過重複的請求: ${retryKey}`);
+      return safeSend200(res);
+    }
+
+    if (retryKey) {
+      processedRetries.add(retryKey);
+    }
+
+    // 立即回傳 200 OK，避免 LINE 官方因為等待逾時而重試
     safeSend200(res);
 
-    Promise.all(req.body.events.map((event) => handleEvent(event, client)))
-      .catch((err) => {
-        console.error('Webhook error:', err);
+    // 在背景執行處理，發後不理 (fire-and-forget)，不用等待其結果
+    req.body.events.forEach((event) => {
+      handleEvent(event, client).catch(err => {
+        console.error('Background event handling error:', err);
+        // 發生錯誤時將 retryKey 移除，讓下一次如有重試時能再執行
+        if (retryKey) processedRetries.delete(retryKey);
       });
+    });
   }
 );
 

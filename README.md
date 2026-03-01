@@ -7,6 +7,8 @@
 - **純文字對話**：傳送任何文字訊息，機器人皆會由 AI 模型回應。
 - **GEM (自訂專家) 概念**：可透過設定 `GEM_SYSTEM_INSTRUCTION` 環境變數，賦予模型特定人設與系統提示（System Prompt），例如將其設定為專業導遊、程式設計助理等。
 - **雙模型備援**：優先使用 `GEMINI_API_KEY`，如未設定或呼叫失敗，將自動轉由 `OPENROUTER_API_KEY` 接手。
+- **強健的非同步架構 (Best Practice)**：因應 LLM 思考時間較長，實作了防重複金鑰 (`x-line-retry-key`) 以避免 LINE Webhook 逾時重發；並具備「發後不理 (fire-and-forget)」的背景處理機制。
+- **智慧回覆降級與體驗優化**：對話當下會顯示讀取動畫 (Loading Animation)，並在處理完畢時優先使用 Reply API，若因等待過久導致 Token 失效，將自動降級改用 Push API 主動推播結果，確保訊息不漏接。
 
 ## 環境變數
 
