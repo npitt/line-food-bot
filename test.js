@@ -1,0 +1,1 @@
+const fetch = require('node-fetch'); (async () => { const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=35.6874&longitude=139.6928&hourly=temperature_2m,relative_humidity_2m&start_date=2026-03-01&end_date=2026-03-01'); const data = await res.json(); console.log(data.hourly.time[0], data.hourly.temperature_2m[0]); })();
